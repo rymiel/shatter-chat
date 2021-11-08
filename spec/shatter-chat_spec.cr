@@ -1,6 +1,7 @@
 require "./spec_helper"
 
 describe Shatter::Chat do
+  Colorize.enabled = true
   it "applies simple color" do
     test_json(
       %({"text": "Hello, world!", "color": "red"}),
