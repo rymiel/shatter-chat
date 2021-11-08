@@ -40,11 +40,13 @@ module Shatter::Chat
   def component(obj : Hash(String, JSON::Any))
     String.build do |str|
       colorized = color_string((obj.fetch("text", nil).try &.as_s).to_s, obj.fetch("color", nil).try &.as_s)
-      colorized = colorized.bold if obj.fetch("bold", false)
-      colorized = colorized.italic if obj.fetch("italic", false)
-      colorized = colorized.underline if obj.fetch("underlined", false)
-      colorized = colorized.strikethrough if obj.fetch("strikethrough", false)
-      colorized = colorized.blink if obj.fetch("obfuscated", false)
+      {% for decoration in { {:bold,          "bold"},
+                             {:italic,        "italic"},
+                             {:underline,     "underlined"},
+                             {:strikethrough, "strikethrough"},
+                             {:blink,         "obfuscated"} } %}
+        colorized = colorized.{{ decoration[0].id }} if obj[{{ decoration[1] }}]?.try &.as_bool
+      {% end %}
       str << colorized
       if extra = obj.fetch("extra", nil)
         extra.as_a.each { |e| str << component e.as_h }

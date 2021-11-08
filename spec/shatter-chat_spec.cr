@@ -22,4 +22,11 @@ describe Shatter::Chat do
       %(\e[91;1mHello, both!\e[0m)
     )
   end
+
+  it "respects false decorations" do
+    test_json(
+      %({"text": "Hello, no bold!", "color": "red", "bold": false}),
+      %(\e[91mHello, no bold!\e[0m)
+    )
+  end
 end
