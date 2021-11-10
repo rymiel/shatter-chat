@@ -99,7 +99,7 @@ module Shatter::Chat
       tr_style = mem.to_s
       add_text @translation_stack.pop.gsub("%s") { |r|
         i += 1
-        tr_style + args[i]
+        args[i] + tr_style
       }
       if args.size > (i + 1)
         add_special " %extra( "
