@@ -28,6 +28,7 @@ module Shatter::Chat
 
   class Reader(T)
     getter builder : Builder(T)
+
     def initialize(@builder)
     end
 

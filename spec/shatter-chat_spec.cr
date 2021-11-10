@@ -5,9 +5,10 @@ def test_json_ansi(json_string, expected)
   r = Shatter::Chat::AnsiBuilder.new.read h
   r.should eq(expected)
 end
+
 describe Shatter::Chat::AnsiBuilder do
   Colorize.enabled = true
-  
+
   it "reads no color" do
     test_json_ansi(
       %({"text": "Hello, world!"}),

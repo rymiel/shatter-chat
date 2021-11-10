@@ -20,11 +20,11 @@ module Shatter::Chat
     }
 
     ANSI_DECORATION_MAP = {
-      Decoration::Bold => 1,
-      Decoration::Italic => 3,
-      Decoration::Underlined => 4,
+      Decoration::Bold          => 1,
+      Decoration::Italic        => 3,
+      Decoration::Underlined    => 4,
       Decoration::Strikethrough => 9,
-      Decoration::Obfuscated => 5,
+      Decoration::Obfuscated    => 5,
     }
 
     alias RGB = {r: UInt8, g: UInt8, b: UInt8}
@@ -53,7 +53,7 @@ module Shatter::Chat
 
     def add_text(s : String)
       color = @color_stack.last?
-      decorations = @decoration_state.map { |k, v| v.last? ? k : nil}.compact
+      decorations = @decoration_state.map { |k, v| v.last? ? k : nil }.compact
       if color.nil? && decorations.empty?
         @s << s
       else
@@ -61,7 +61,7 @@ module Shatter::Chat
         @s << "\e["
         case color
         when Int32 then @s << color
-        when RGB then @s << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
+        when RGB   then @s << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
         end
         @s << ";" if color && !decorations.empty?
         decorations.join @s, ";"
