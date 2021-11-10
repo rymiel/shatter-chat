@@ -1,6 +1,7 @@
 require "./reader"
 require "./builder"
 require "./ansi"
+require "./html"
 require "json"
 
 module Shatter::Chat

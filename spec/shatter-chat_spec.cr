@@ -150,4 +150,41 @@ module Shatter::Chat
       )
     end
   end
+
+  describe HtmlBuilder do
+    it "reads no color" do
+      test_json_html(
+        %({"text": "Hello, world!"}),
+        %(Hello, world!)
+      )
+    end
+
+    it "applies simple color" do
+      test_json_html(
+        %({"text": "Hello, world!", "color": "red"}),
+        %(<span style="color:#FF5555">Hello, world!</span>)
+      )
+    end
+
+    it "applies rgb color" do
+      test_json_html(
+        %({"text": "Hello, world!", "color": "#ff08ff"}),
+        %(<span style="color:#ff08ff">Hello, world!</span>)
+      )
+    end
+
+    it "applies simple decoration" do
+      test_json_html(
+        %({"text": "Hello, bold!", "bold": true}),
+        %(<b>Hello, bold!</b>)
+      )
+    end
+
+    it "applies simple color and decoration pair" do
+      test_json_html(
+        %({"text": "Hello, both!", "color": "red", "bold": true}),
+        %(<span style="color:#FF5555"><b>Hello, both!</b></span>)
+      )
+    end
+  end
 end
