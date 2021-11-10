@@ -65,32 +65,41 @@ module Shatter::Chat
       @argument_stack.last?.try &.last? || @s
     end
 
-    def add_text(s : String)
-      o = current_output
+    private def decorations
+      @decoration_state.map { |k, v| v.last? ? k : nil }.compact
+    end
+
+    private def current_style(io : IO)
       color = @color_stack.last?
-      decorations = @decoration_state.map { |k, v| v.last? ? k : nil }.compact
-      if color.nil? && decorations.empty?
-        o << s
+      io << "\e["
+      case color
+      when Int32 then io << color
+      when RGB   then io << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
+      end
+      io << ";" if color && !decorations.empty?
+      decorations.join io, ";"
+      io << 'm'
+    end
+
+    def add_text(s : String)
+      if @color_stack.last?.nil? && decorations.empty?
+        current_output << s
       else
-        o << "\e["
-        case color
-        when Int32 then o << color
-        when RGB   then o << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
-        end
-        o << ";" if color && !decorations.empty?
-        decorations.join o, ";"
-        o << 'm'
-        o << s
-        o << "\e[0m"
+        current_style current_output
+        current_output << s
+        current_output << "\e[0m"
       end
     end
 
     def apply_translation
       i = -1
       args = @argument_stack.pop.map &.to_s
-      add_text @translation_stack.pop.gsub("%s") { |r|
+      mem = IO::Memory.new
+      current_style mem
+      tr_style = mem.to_s
+      current_output << tr_style << @translation_stack.pop.gsub("%s") { |r|
         i += 1
-        args[i]
+        tr_style + args[i]
       }
       if args.size > (i + 1)
         add_special " %extra( "
