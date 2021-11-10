@@ -57,6 +57,7 @@ module Shatter::Chat
       color = @color_stack.last?
       decorations = @decoration_state.map { |k, v| v.last? ? k : nil }.compact
       if color.nil? && decorations.empty?
+        @s << "\e[0m" if @had_color || @had_decoration
         @s << s
       else
         @s << "\e[0m" if @had_decoration && decorations.empty?
