@@ -186,5 +186,12 @@ module Shatter::Chat
         %(<span style="color:#FF5555"><b>Hello, both!</b></span>)
       )
     end
+
+    it "respects false decorations" do
+      test_json_html(
+        %({"text": "Hello, no bold!", "color": "red", "bold": false}),
+        %(<span style="color:#FF5555">Hello, no bold!</span>)
+      )
+    end
   end
 end

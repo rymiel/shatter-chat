@@ -53,8 +53,8 @@ module Shatter::Chat
       decoration_tag = HTML_DECORATION_MAP[d]
       deco = @decoration_state.fetch(decoration_tag, Array(Bool).new)
       deco << state
-      current_output << "<#{decoration_tag}>"
-      @stack << {"</#{decoration_tag}>", deco}
+      current_output << "<#{decoration_tag}>" if state
+      @stack << {state ? "</#{decoration_tag}>" : "", deco}
       @decoration_state[HTML_DECORATION_MAP[d]] = deco
     end
 
