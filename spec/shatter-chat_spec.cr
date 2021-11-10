@@ -139,28 +139,28 @@ module Shatter::Chat
     it "inherits decorations" do
       test_json_ansi(
         %({"text": "one ", "color": "red", "extra": [{"text": "two ", "color": "blue"}, {"text": "three"}]}),
-        %(\e[91mone \e[94mtwo \e[91mthree\e[0m)
+        %(\e[91mone \e[0m\e[94mtwo \e[0m\e[91mthree\e[0m)
       )
     end
 
     it "applies translatable" do
       test_json_ansi(
         %({"translate": "chat.type.advancement.task", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}),
-        %(\e[92marg1 has made the advancement \e[91marg2\e[0m)
+        %(\e[92marg1\e[0m has made the advancement \e[91marg2\e[0m)
       )
     end
 
     it "applies oversized translatable" do
       test_json_ansi(
         %({"translate": "chat.type.advancement.task", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}, {"text": "arg3"}]}),
-        %(\e[92marg1 has made the advancement \e[91marg2\e[39;7m %extra( \e[0m\e[92marg3\e[39;7m ) \e[0m)
+        %(\e[92marg1\e[0m has made the advancement \e[91marg2\e[0m\e[39;7m %extra( \e[0m\e[92marg3\e[0m\e[39;7m ) \e[0m)
       )
     end
 
     it "applies translatable with no root style" do
       test_json_ansi(
         %({"translate": "chat.key", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}),
-        %(<chat.key>\e[39;7m %( \e[0marg1\e[39;7m , \e[0m\e[91marg2\e[39;7m ) \e[0m)
+        %(<chat.key>\e[39;7m %( \e[0marg1\e[39;7m , \e[0m\e[91marg2\e[0m\e[39;7m ) \e[0m)
       )
     end
   end

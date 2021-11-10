@@ -29,8 +29,6 @@ module Shatter::Chat
     }
 
     @s = String::Builder.new
-    @had_color = false
-    @had_decoration = false
     @color_stack = [] of Int32 | RGB
     @translation_stack = [] of String
     @argument_stack = [] of Array(String::Builder)
@@ -72,10 +70,8 @@ module Shatter::Chat
       color = @color_stack.last?
       decorations = @decoration_state.map { |k, v| v.last? ? k : nil }.compact
       if color.nil? && decorations.empty?
-        o << "\e[0m" if @had_color || @had_decoration
         o << s
       else
-        o << "\e[0m" if (@had_decoration && !decorations.any?) || (@had_color && color.nil?)
         o << "\e["
         case color
         when Int32 then o << color
@@ -83,10 +79,9 @@ module Shatter::Chat
         end
         o << ";" if color && !decorations.empty?
         decorations.join @s, ";"
-        @had_decoration = !decorations.empty?
-        @had_color = !color.nil?
         o << 'm'
         o << s
+        o << "\e[0m"
       end
     end
 
@@ -98,7 +93,7 @@ module Shatter::Chat
         args[i]
       }
       if args.size > (i + 1)
-        add_special " %extra( \e[0m"
+        add_special " %extra( "
         args[i+1..].each_with_index do |j, k|
           add_special " , " if k > 0
           current_output << j
@@ -112,7 +107,6 @@ module Shatter::Chat
     end
 
     def result : String
-      @s << "\e[0m" if @had_color || @had_decoration
       @s.to_s
     end
   end

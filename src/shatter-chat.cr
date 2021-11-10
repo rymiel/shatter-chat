@@ -4,6 +4,5 @@ require "./ansi"
 require "json"
 
 module Shatter::Chat
-  extend self
-  VERSION = "0.2.0"
+  VERSION = "0.2.1"
 end
