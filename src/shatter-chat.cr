@@ -1,4 +1,3 @@
-require "./ext"
 require "./reader"
 require "./builder"
 require "./ansi"
