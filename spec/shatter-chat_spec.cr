@@ -57,4 +57,11 @@ describe Shatter::Chat::AnsiBuilder do
       %(\e[91mone \e[94mtwo \e[91mthree\e[0m)
     )
   end
+
+  it "applies (temporary) translatable" do
+    test_json_ansi(
+      %({"translate": "chat.key", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}),
+      %(\e[92m<chat.key>\e[39;7m %( \e[0m\e[92marg1\e[39;7m , \e[0m\e[91marg2\e[39;7m ) \e[0m)
+    )
+  end
 end

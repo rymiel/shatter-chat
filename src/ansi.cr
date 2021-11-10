@@ -76,9 +76,7 @@ module Shatter::Chat
     end
 
     def pop
-      t = @stack.pop
-      pp! t
-      t.pop
+      t = @stack.pop.pop
     end
 
     def result : String
