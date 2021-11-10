@@ -53,9 +53,13 @@ module Shatter::Chat
           pending += 1
         end
       {% end %}
-      @builder.add_text obj["text"]?.to_s
-      if extra = obj.fetch("extra", nil)
-        extra.as_a.each { |e| read e.as_h }
+      if translate = obj["translate"]?
+        extra = obj["with"]?.try &.as_a
+        @builder.add_text "<#{translate}>#{extra && extra.empty? ? "" : " % "}"
+        extra.try &.each { |e| read e.as_h }
+      else
+        @builder.add_text obj["text"]?.to_s
+        obj["extra"]?.try &.as_a.each { |e| read e.as_h }
       end
       @builder.pop_multiple pending
       @builder
