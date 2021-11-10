@@ -11,6 +11,9 @@ module Shatter::Chat
     abstract def push_color(c : NamedColor)
     abstract def push_rgb(r : UInt8, g : UInt8, b : UInt8)
     abstract def push_decoration(d : Decoration, state : Bool)
+    abstract def push_translatable(s : String)
+    abstract def push_argument
+    abstract def apply_translation
     abstract def add_text(s : String)
     abstract def pop
     abstract def result : T

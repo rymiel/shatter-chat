@@ -28,6 +28,7 @@ module Shatter::Chat
   end
 
   class Reader(T)
+    KEYS = File.open "#{__DIR__}/chat.json" { |f| JSON.parse f }
     getter builder : Builder(T)
 
     def initialize(@builder)
@@ -54,15 +55,26 @@ module Shatter::Chat
           pending += 1
         end
       {% end %}
-      if translate = obj["translate"]?
+      if translate = obj["translate"]?.try &.as_s
         extra = obj["with"]?.try &.as_a
-        @builder.add_text "<#{translate}>"
-        @builder.add_special " %( " unless extra.nil?
-        extra.try &.each_with_index { |e, i|
-          @builder.add_special " , " if i > 0
-          read e.as_h
-        }
-        @builder.add_special " ) " unless extra.nil?
+        translate_category, translate_key = translate.split(".", limit: 2)
+        i = KEYS[translate_category]?.try &.[translate_key]?.try &.as_s
+        if i.nil?
+          @builder.add_text("<#{translate}>")
+          @builder.add_special " %( " unless extra.nil?
+          extra.try &.each_with_index { |e, i|
+            @builder.add_special " , " if i > 0
+            read e.as_h
+          }
+          @builder.add_special " ) " unless extra.nil?
+        else
+          @builder.push_translatable i
+          extra.try &.each_with_index { |e|
+            @builder.push_argument
+            read e.as_h
+          }
+          @builder.apply_translation
+        end
       else
         @builder.add_text obj["text"]?.to_s
         obj["extra"]?.try &.as_a.each { |e| read e.as_h }

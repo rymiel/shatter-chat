@@ -33,6 +33,8 @@ module Shatter::Chat
     @had_color = false
     @had_decoration = false
     @color_stack = [] of Int32 | RGB
+    @translation_stack = [] of String
+    @argument_stack = [] of Array(String::Builder)
     @decoration_state = {} of Int32 => Array(Bool)
     @stack = [] of Array(Int32 | RGB) | Array(Bool)
 
@@ -53,26 +55,56 @@ module Shatter::Chat
       @decoration_state[ANSI_DECORATION_MAP[d]] = deco
     end
 
+    def push_translatable(s : String)
+      @translation_stack << s
+      @argument_stack << Array(String::Builder).new
+    end
+
+    def push_argument
+      @argument_stack.last << String::Builder.new
+    end
+
+    private def current_output
+      @argument_stack.last?.try &.last? || @s
+    end
+
     def add_text(s : String)
+      o = current_output
       color = @color_stack.last?
       decorations = @decoration_state.map { |k, v| v.last? ? k : nil }.compact
       if color.nil? && decorations.empty?
-        @s << "\e[0m" if @had_color || @had_decoration
-        @s << s
+        o << "\e[0m" if @had_color || @had_decoration
+        o << s
       else
-        @s << "\e[0m" if @had_decoration && decorations.empty?
-        @s << "\e[0m" if @had_color && color.nil?
-        @s << "\e["
+        o << "\e[0m" if (@had_decoration && !decorations.any?) || (@had_color && color.nil?)
+        o << "\e["
         case color
-        when Int32 then @s << color
-        when RGB   then @s << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
+        when Int32 then o << color
+        when RGB   then o << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
         end
-        @s << ";" if color && !decorations.empty?
+        o << ";" if color && !decorations.empty?
         decorations.join @s, ";"
         @had_decoration = !decorations.empty?
         @had_color = !color.nil?
-        @s << 'm'
-        @s << s
+        o << 'm'
+        o << s
+      end
+    end
+
+    def apply_translation
+      i = -1
+      args = @argument_stack.pop.map &.to_s
+      current_output << @translation_stack.pop.gsub("%s") { |r|
+        i += 1
+        args[i]
+      }
+      if args.size > (i + 1)
+        add_special " %extra( \e[0m"
+        args[i+1..].each_with_index do |j, k|
+          add_special " , " if k > 0
+          current_output << j
+        end
+        add_special " ) "
       end
     end
 

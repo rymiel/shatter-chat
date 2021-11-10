@@ -58,10 +58,17 @@ describe Shatter::Chat::AnsiBuilder do
     )
   end
 
-  it "applies (temporary) translatable" do
+  it "applies translatable" do
     test_json_ansi(
-      %({"translate": "chat.key", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}),
-      %(\e[92m<chat.key>\e[39;7m %( \e[0m\e[92marg1\e[39;7m , \e[0m\e[91marg2\e[39;7m ) \e[0m)
+      %({"translate": "chat.type.advancement.task", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}),
+      %(\e[92marg1 has made the advancement \e[91marg2\e[0m)
+    )
+  end
+
+  it "applies oversized translatable" do
+    test_json_ansi(
+      %({"translate": "chat.type.advancement.task", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}, {"text": "arg3"}]}),
+      %(\e[92marg1 has made the advancement \e[91marg2\e[39;7m %extra( \e[0m\e[92marg3\e[39;7m ) \e[0m)
     )
   end
 
