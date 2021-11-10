@@ -3,7 +3,6 @@ require "./reader"
 require "./builder"
 require "./ansi"
 require "json"
-require "colorize"
 
 module Shatter::Chat
   extend self
