@@ -24,6 +24,7 @@ module Shatter::Chat
     Underlined
     Strikethrough
     Obfuscated
+    Special
   end
 
   class Reader(T)
@@ -55,8 +56,13 @@ module Shatter::Chat
       {% end %}
       if translate = obj["translate"]?
         extra = obj["with"]?.try &.as_a
-        @builder.add_text "<#{translate}>#{extra && extra.empty? ? "" : " % "}"
-        extra.try &.each { |e| read e.as_h }
+        @builder.add_text "<#{translate}>"
+        @builder.add_special " %( " unless extra.nil?
+        extra.try &.each_with_index { |e, i|
+          @builder.add_special " , " if i > 0
+          read e.as_h
+        }
+        @builder.add_special " ) " unless extra.nil?
       else
         @builder.add_text obj["text"]?.to_s
         obj["extra"]?.try &.as_a.each { |e| read e.as_h }

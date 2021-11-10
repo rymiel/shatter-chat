@@ -23,13 +23,15 @@ module Shatter::Chat
       Decoration::Bold          => 1,
       Decoration::Italic        => 3,
       Decoration::Underlined    => 4,
-      Decoration::Strikethrough => 9,
       Decoration::Obfuscated    => 5,
+      Decoration::Special       => 7,
+      Decoration::Strikethrough => 9,
     }
 
     alias RGB = {r: UInt8, g: UInt8, b: UInt8}
     @s = String::Builder.new
     @had_color = false
+    @had_decoration = false
     @color_stack = [] of Int32 | RGB
     @decoration_state = {} of Int32 => Array(Bool)
     @stack = [] of Array(Int32 | RGB) | Array(Bool)
@@ -57,7 +59,8 @@ module Shatter::Chat
       if color.nil? && decorations.empty?
         @s << s
       else
-        @had_color = true
+        @s << "\e[0m" if @had_decoration && decorations.empty?
+        @s << "\e[0m" if @had_color && color.nil?
         @s << "\e["
         case color
         when Int32 then @s << color
@@ -65,17 +68,21 @@ module Shatter::Chat
         end
         @s << ";" if color && !decorations.empty?
         decorations.join @s, ";"
+        @had_decoration = !decorations.empty?
+        @had_color = !color.nil?
         @s << 'm'
         @s << s
       end
     end
 
     def pop
-      @stack.pop.pop
+      t = @stack.pop
+      pp! t
+      t.pop
     end
 
     def result : String
-      @s << "\e[0m" if @had_color
+      @s << "\e[0m" if @had_color || @had_decoration
       @s.to_s
     end
   end

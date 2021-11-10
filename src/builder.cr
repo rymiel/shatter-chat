@@ -13,11 +13,17 @@ module Shatter::Chat
     abstract def push_decoration(d : Decoration, state : Bool)
     abstract def add_text(s : String)
     abstract def pop
+    abstract def result : T
 
     def pop_multiple(i)
       i.times { pop }
     end
 
-    abstract def result : T
+    def add_special(s : String)
+      push_color NamedColor::White
+      push_decoration Decoration::Special, true
+      add_text s
+      pop_multiple 2
+    end
   end
 end
