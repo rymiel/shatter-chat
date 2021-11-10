@@ -97,7 +97,7 @@ module Shatter::Chat
       mem = IO::Memory.new
       current_style mem
       tr_style = mem.to_s
-      current_output << tr_style << @translation_stack.pop.gsub("%s") { |r|
+      add_text @translation_stack.pop.gsub("%s") { |r|
         i += 1
         tr_style + args[i]
       }
