@@ -71,6 +71,7 @@ module Shatter::Chat
 
     private def current_style(io : IO)
       color = @color_stack.last?
+      return false if color.nil? && decorations.empty?
       io << "\e["
       case color
       when Int32 then io << color
@@ -79,16 +80,13 @@ module Shatter::Chat
       io << ";" if color && !decorations.empty?
       decorations.join io, ";"
       io << 'm'
+      return true
     end
 
     def add_text(s : String)
-      if @color_stack.last?.nil? && decorations.empty?
-        current_output << s
-      else
-        current_style current_output
-        current_output << s
-        current_output << "\e[0m"
-      end
+      has_style = current_style current_output
+      current_output << s
+      current_output << "\e[0m" if has_style
     end
 
     def apply_translation
