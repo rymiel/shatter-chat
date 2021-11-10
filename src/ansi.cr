@@ -78,7 +78,7 @@ module Shatter::Chat
         when RGB   then o << "38;2;" << color[:r] << ";" << color[:g] << ";" << color[:b]
         end
         o << ";" if color && !decorations.empty?
-        decorations.join @s, ";"
+        decorations.join o, ";"
         o << 'm'
         o << s
         o << "\e[0m"
@@ -88,7 +88,7 @@ module Shatter::Chat
     def apply_translation
       i = -1
       args = @argument_stack.pop.map &.to_s
-      current_output << @translation_stack.pop.gsub("%s") { |r|
+      add_text @translation_stack.pop.gsub("%s") { |r|
         i += 1
         args[i]
       }
