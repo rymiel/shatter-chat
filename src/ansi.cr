@@ -32,20 +32,22 @@ module Shatter::Chat
     @had_color = false
     @color_stack = [] of Int32 | RGB
     @decoration_state = {} of Int32 => Array(Bool)
-    @decoration_stack = [] of Array(Bool)
+    @stack = [] of Array(Int32 | RGB) | Array(Bool)
 
     def push_color(c : NamedColor)
       @color_stack << ANSI_COLOR_MAP[c]
+      @stack << @color_stack
     end
 
     def push_rgb(r : UInt8, g : UInt8, b : UInt8)
       @color_stack << {r: r, g: g, b: b}
+      @stack << @color_stack
     end
 
     def push_decoration(d : Decoration, state : Bool)
       deco = @decoration_state.fetch(ANSI_DECORATION_MAP[d], Array(Bool).new)
       deco << state
-      @decoration_stack << deco
+      @stack << deco
       @decoration_state[ANSI_DECORATION_MAP[d]] = deco
     end
 
@@ -68,16 +70,8 @@ module Shatter::Chat
       end
     end
 
-    def pop_color
-      @color_stack.pop
-    end
-
-    def pop_rgb
-      @color_stack.pop
-    end
-
-    def pop_decoration
-      @decoration_stack.pop.pop
+    def pop
+      @stack.pop.pop
     end
 
     def result : String
