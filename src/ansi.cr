@@ -28,7 +28,6 @@ module Shatter::Chat
       Decoration::Strikethrough => 9,
     }
 
-    alias RGB = {r: UInt8, g: UInt8, b: UInt8}
     @s = String::Builder.new
     @had_color = false
     @had_decoration = false

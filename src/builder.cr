@@ -1,4 +1,5 @@
 module Shatter::Chat
+  alias RGB = {r: UInt8, g: UInt8, b: UInt8}
   abstract class Builder(T)
     def reader_for_self : Reader(T)
       Reader(T).new self
