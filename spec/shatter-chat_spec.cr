@@ -65,7 +65,7 @@ module Shatter::Chat
     it "applies translatable" do
       test_json %({"translate": "chat.type.advancement.task", "color": "green", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}) do |i|
         i.push_color NamedColor::Green
-        i.push_translatable Reader::KEYS["chat"]["type.advancement.task"].as_s
+        i.push_translatable Reader::MojangAssetLangReader.new.keys["chat.type.advancement.task"]
         i.push_argument
           i.add_text "arg1"
         i.push_argument
