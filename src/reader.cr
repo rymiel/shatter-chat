@@ -56,6 +56,12 @@ module Shatter::Chat
         File.open @file_name { |f| Hash(String, String).from_json f }
       end
     end
+
+    class NilLangReader < LangReader
+      def keys : Hash(String, String)
+        Hash(String, String).new
+      end
+    end
     
     getter builder : Builder(T)
 
