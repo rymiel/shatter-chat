@@ -28,10 +28,38 @@ module Shatter::Chat
   end
 
   class Reader(T)
-    KEYS = File.open "#{__DIR__}/chat.json" { |f| JSON.parse f }
+    abstract class LangReader
+      abstract def keys : Hash(String, String)
+    end
+
+    class MojangAssetLangReader < LangReader
+      @@memo : Hash(String, String)? = nil
+      def initialize(@language_code = "en_us")
+      end
+
+      def keys : Hash(String, String)
+        if memo = @@memo
+          memo
+        else
+          memo = MojangAssets::LauncherMeta.get_language_file @language_code
+          @@memo = memo
+          memo
+        end
+      end
+    end
+
+    class LocalFileLangReader < LangReader
+      def initialize(@file_name = "chat.json")
+      end
+
+      def keys : Hash(String, String)
+        File.open @file_name { |f| Hash(String, String).from_json f }
+      end
+    end
+    
     getter builder : Builder(T)
 
-    def initialize(@builder)
+    def initialize(@builder, @lang_reader = MojangAssetLangReader.new)
     end
 
     def read(obj : Hash(String, JSON::Any)) : Builder(T)
@@ -57,8 +85,8 @@ module Shatter::Chat
       {% end %}
       if translate = obj["translate"]?.try &.as_s
         extra = obj["with"]?.try &.as_a
-        translate_category, translate_key = translate.split(".", limit: 2)
-        i = KEYS[translate_category]?.try &.[translate_key]?.try &.as_s
+        # translate_category, translate_key = translate.split(".", limit: 2)
+        i = @lang_reader.keys[translate]?
         if i.nil?
           @builder.add_text("<#{translate}>")
           @builder.add_special " %( " unless extra.nil?
