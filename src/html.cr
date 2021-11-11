@@ -84,7 +84,7 @@ module Shatter::Chat
     def apply_translation
       i = -1
       args = @argument_stack.pop.map &.to_s
-      add_text @translation_stack.pop.gsub("%s") { |r|
+      current_output << @translation_stack.pop.gsub("%s") { |r|
         i += 1
         args[i]
       }
