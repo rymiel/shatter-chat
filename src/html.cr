@@ -37,18 +37,18 @@ module Shatter::Chat
     @decoration_state = {} of String => Array(Bool)
     @stack = [] of {String, Array(String) | Array(Bool)}
 
-    def push_color(c : NamedColor)
-      color = HTML_COLOR_MAP[c]
-      @color_stack << color
-      current_output << "<span style=\"color:#{color}\">"
+    def add_color_to_stack(s : String)
+      @color_stack << s
+      current_output << "<span style=\"color:#{s}\">"
       @stack << {"</span>", @color_stack}
     end
 
+    def push_color(c : NamedColor)
+      add_color_to_stack HTML_COLOR_MAP[c]
+    end
+
     def push_rgb(r : UInt8, g : UInt8, b : UInt8)
-      color = "##{r.to_s(16).rjust 2, '0'}#{g.to_s(16).rjust 2, '0'}#{b.to_s(16).rjust 2, '0'}"
-      @color_stack << color
-      current_output << "<span style=\"color:#{color}\">"
-      @stack << {"</span>", @color_stack}
+      add_color_to_stack "##{r.to_s(16).rjust 2, '0'}#{g.to_s(16).rjust 2, '0'}#{b.to_s(16).rjust 2, '0'}"
     end
 
     def push_decoration(d : Decoration, state : Bool)
