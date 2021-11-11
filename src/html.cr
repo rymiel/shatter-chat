@@ -1,3 +1,5 @@
+require "html"
+
 module Shatter::Chat
   class HtmlBuilder < Builder(String)
     HTML_COLOR_MAP = {
@@ -76,7 +78,7 @@ module Shatter::Chat
     end
 
     def add_text(s : String)
-      current_output << s
+      HTML.escape s, current_output
     end
 
     def apply_translation

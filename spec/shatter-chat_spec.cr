@@ -193,5 +193,12 @@ module Shatter::Chat
         %(<span style="color:#FF5555">Hello, no bold!</span>)
       )
     end
+
+    it "escapes user-input tags" do
+      test_json_html(
+        %({"text": "Totally <p>wned", "color": "red"}),
+        %(<span style="color:#FF5555">Totally &lt;p&gt;wned</span>)
+      )
+    end
   end
 end
