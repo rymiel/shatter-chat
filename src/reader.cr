@@ -62,10 +62,31 @@ module Shatter::Chat
         Hash(String, String).new
       end
     end
-    
+
     getter builder : Builder(T)
 
     def initialize(@builder, @lang_reader = MojangAssetLangReader.new)
+    end
+
+    private def read_generic(obj : JSON::Any)
+      g = convert_generic obj
+      read g unless g.nil?
+    end
+
+    private def convert_generic(obj : JSON::Any) : Hash(String, JSON::Any)?
+      if h = obj.as_h?
+        return h
+      elsif a = obj.as_a?
+        return if a.size == 0
+        first = convert_generic(a[0])
+        return first if a.size == 1 || first.nil?
+        additional = a[1..]
+        first["extra"] = JSON::Any.new((first["extra"]?.try &.as_a || [] of JSON::Any) + additional)
+        return first
+      elsif s = obj.as_s?
+        return {"text" => JSON::Any.new s}
+      else raise TypeCastError.new("Cannot use #{obj.class} as a chat component")
+      end
     end
 
     def read(obj : Hash(String, JSON::Any)) : Builder(T)
@@ -98,20 +119,20 @@ module Shatter::Chat
           @builder.add_special " %( " unless extra.nil?
           extra.try &.each_with_index { |e, i|
             @builder.add_special " , " if i > 0
-            read e.as_h
+            read_generic e
           }
           @builder.add_special " ) " unless extra.nil?
         else
           @builder.push_translatable i
           extra.try &.each_with_index { |e|
             @builder.push_argument
-            read e.as_h
+            read_generic e
           }
           @builder.apply_translation
         end
       else
         @builder.add_text obj["text"]?.to_s
-        obj["extra"]?.try &.as_a.each { |e| read e.as_h }
+        obj["extra"]?.try &.as_a.each { |e| read_generic e }
       end
       @builder.pop_multiple pending
       @builder

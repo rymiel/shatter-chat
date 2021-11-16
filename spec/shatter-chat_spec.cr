@@ -15,7 +15,7 @@ module Shatter::Chat
         i.pop
       end
     end
-    
+
     it "applies rgb color" do
       test_json %({"text": "Hello, world!", "color": "#ff08ff"}) do |i|
         i.push_rgb r: 0xffu8, g: 0x08u8, b: 0xffu8
@@ -87,6 +87,17 @@ module Shatter::Chat
         i.add_text "arg2"
         i.pop
         i.add_special " ) "
+      end
+    end
+
+    it "reads shorthand types" do
+      test_json %({"text": "First", "color": "red", "extra": [[{"text": "Second", "color": "blue"}, "Third"]]}) do |i|
+        i.push_color NamedColor::Red
+        i.add_text "First"
+        i.push_color NamedColor::Blue
+        i.add_text "Second"
+        i.add_text "Third"
+        i.pop_multiple 2
       end
     end
   end
