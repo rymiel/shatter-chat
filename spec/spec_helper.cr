@@ -20,5 +20,5 @@ def test_json(json_string)
   expected = Shatter::Chat::SpecBuilder.new
   yield expected
   expected.result
-  expected.stack.should eq(actual.stack)
+  actual.stack.should eq(expected.stack)
 end

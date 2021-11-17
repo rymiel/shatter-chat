@@ -79,14 +79,14 @@ module Shatter::Chat
 
     it "applies translatable with no root style" do
       test_json %({"translate": "chat.key", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}) do |i|
-        i.add_text "<chat.key>"
-        i.add_special " %( "
-        i.add_text "arg1"
-        i.add_special " , "
-        i.push_color NamedColor::Red
-        i.add_text "arg2"
-        i.pop
-        i.add_special " ) "
+        i.push_translatable "chat.key"
+        i.push_argument
+          i.add_text "arg1"
+        i.push_argument
+          i.push_color NamedColor::Red
+          i.add_text "arg2"
+          i.pop
+        i.apply_translation
       end
     end
 
@@ -157,7 +157,14 @@ module Shatter::Chat
     it "applies translatable with no root style" do
       test_json_ansi(
         %({"translate": "chat.key", "with": [{"text": "arg1"}, {"text": "arg2", "color": "red"}]}),
-        %(<chat.key>\e[39;7m %( \e[0marg1\e[39;7m , \e[0m\e[91marg2\e[0m\e[39;7m ) \e[0m)
+        %(chat.key\e[39;7m %( \e[0marg1\e[39;7m , \e[0m\e[91marg2\e[0m\e[39;7m ) \e[0m)
+      )
+    end
+
+    it "applies translatable with indexed arguments" do
+      test_json_ansi(
+        %({"translate": "Names: %s %2$s %s", "with": ["Alice", "Bob"]}),
+        %(Names: Alice Bob Bob)
       )
     end
   end
@@ -209,6 +216,13 @@ module Shatter::Chat
       test_json_html(
         %({"text": "Totally <p>wned", "color": "red"}),
         %(<span style="color:#FF5555">Totally &lt;p&gt;wned</span>)
+      )
+    end
+
+    it "applies translatable with indexed arguments" do
+      test_json_html(
+        %({"translate": "Names: %s %2$s %s", "with": ["Alice", "Bob"]}),
+        %(Names: Alice Bob Bob)
       )
     end
   end

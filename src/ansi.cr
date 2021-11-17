@@ -98,9 +98,9 @@ module Shatter::Chat
       add_text @translation_stack.pop.gsub("%s") { |r|
         i += 1
         args[i] + tr_style
-      }
+      }.gsub(/%(\d+)\$s/) { |r| args[r[1].to_i-1] + tr_style }
       if args.size > (i + 1)
-        add_special " %extra( "
+        add_special " %( "
         args[i+1..].each_with_index do |j, k|
           add_special " , " if k > 0
           current_output << j

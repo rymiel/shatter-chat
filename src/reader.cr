@@ -112,24 +112,12 @@ module Shatter::Chat
       {% end %}
       if translate = obj["translate"]?.try &.as_s
         extra = obj["with"]?.try &.as_a
-        # translate_category, translate_key = translate.split(".", limit: 2)
-        i = @lang_reader.keys[translate]?
-        if i.nil?
-          @builder.add_text("<#{translate}>")
-          @builder.add_special " %( " unless extra.nil?
-          extra.try &.each_with_index { |e, i|
-            @builder.add_special " , " if i > 0
-            read_generic e
-          }
-          @builder.add_special " ) " unless extra.nil?
-        else
-          @builder.push_translatable i
-          extra.try &.each_with_index { |e|
-            @builder.push_argument
-            read_generic e
-          }
-          @builder.apply_translation
-        end
+        @builder.push_translatable(@lang_reader.keys[translate]? || translate)
+        extra.try &.each_with_index { |e|
+          @builder.push_argument
+          read_generic e
+        }
+        @builder.apply_translation
       else
         @builder.add_text obj["text"]?.to_s
         obj["extra"]?.try &.as_a.each { |e| read_generic e }
