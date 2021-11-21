@@ -100,6 +100,30 @@ module Shatter::Chat
         i.pop_multiple 2
       end
     end
+
+    it "converts legacy text" do
+      test_json %({"text": "Don't ever §cdo §4this", "color": "green"}) do |i|
+        i.push_color NamedColor::Green
+          i.add_text "Don't ever "
+          i.push_color NamedColor::Red
+            i.add_text "do "
+          i.pop
+          i.push_color NamedColor::DarkRed
+            i.add_text "this"
+        i.pop_multiple 2
+      end
+    end
+
+    it "converts legacy text at text edges" do
+      test_json %({"text": "§cbad§4", "color": "green"}) do |i|
+        i.push_color NamedColor::Green
+          i.push_color NamedColor::Red
+            i.add_text "bad"
+          i.pop
+          i.push_color NamedColor::DarkRed
+        i.pop_multiple 2
+      end
+    end
   end
 
   describe AnsiBuilder do

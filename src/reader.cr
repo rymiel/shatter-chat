@@ -1,3 +1,5 @@
+require "string_scanner"
+
 module Shatter::Chat
   enum NamedColor
     Black
@@ -18,6 +20,25 @@ module Shatter::Chat
     White
   end
 
+  LEGACY_COLOR_MAP = {
+    '0' => :black,
+    '1' => :dark_blue,
+    '2' => :dark_green,
+    '3' => :dark_aqua,
+    '4' => :dark_red,
+    '5' => :dark_purple,
+    '6' => :gold,
+    '7' => :gray,
+    '8' => :dark_gray,
+    '9' => :blue,
+    'a' => :green,
+    'b' => :aqua,
+    'c' => :red,
+    'd' => :light_purple,
+    'e' => :yellow,
+    'f' => :white
+  } of Char => NamedColor
+
   enum Decoration
     Bold
     Italic
@@ -26,6 +47,16 @@ module Shatter::Chat
     Obfuscated
     Special
   end
+
+  LEGACY_DECORATION_MAP = {
+    'k' => :obfuscated,
+    'l' => :bold,
+    'm' => :strikethrough,
+    'n' => :underlined,
+    'o' => :italic,
+    'r' => :special
+  } of Char => Decoration
+  LEGACY_REGEX = /\x{00A7}#{Regex.union(LEGACY_COLOR_MAP.keys.map(&.to_s) + LEGACY_DECORATION_MAP.keys.map(&.to_s))}/
 
   class Reader(T)
     abstract class LangReader
@@ -89,7 +120,7 @@ module Shatter::Chat
       end
     end
 
-    def read(obj : Hash(String, JSON::Any)) : Builder(T)
+    def read(obj : Hash(String, JSON::Any), *, legacy = true) : Builder(T)
       pending = 0
       color = obj.fetch("color", nil).try &.as_s
       if !color.nil? && color[0] == '#'
@@ -119,11 +150,52 @@ module Shatter::Chat
         }
         @builder.apply_translation
       else
-        @builder.add_text obj["text"]?.to_s
+        if legacy
+          read_legacy_text obj["text"]?.to_s
+        else
+          @builder.add_text obj["text"]?.to_s
+        end
         obj["extra"]?.try &.as_a.each { |e| read_generic e }
       end
       @builder.pop_multiple pending
       @builder
+    end
+
+    private def read_legacy_text(s : String)
+      scanner = StringScanner.new s
+      did_push_color = false
+      did_push_deco = 0
+      loop do
+        m = scanner.scan_until LEGACY_REGEX
+        break if m.nil?
+        matching_marker = m[-1]
+        previous_text = m[..-3]
+        @builder.add_text previous_text unless previous_text.empty?
+        if color_marker = LEGACY_COLOR_MAP[matching_marker]?
+          if did_push_deco > 0
+            @builder.pop_multiple did_push_deco
+            did_push_deco = 0
+          end
+          @builder.pop if did_push_color
+          @builder.push_color color_marker
+          did_push_color = true
+        end
+        if deco_marker = LEGACY_DECORATION_MAP[matching_marker]?
+          if deco_marker.special?
+            @builder.pop_multiple did_push_deco
+            @builder.pop if did_push_color
+            did_push_deco = 0
+            did_push_color = false
+          else
+            @builder.push_decoration deco_marker, true
+            did_push_deco += 1
+          end
+        end
+      end
+      rest = scanner.rest
+      @builder.add_text rest unless rest.empty?
+      @builder.pop_multiple did_push_deco
+      @builder.pop if did_push_color
     end
   end
 end
