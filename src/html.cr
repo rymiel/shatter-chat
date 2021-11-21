@@ -84,13 +84,20 @@ module Shatter::Chat
     def apply_translation
       i = -1
       args = @argument_stack.pop.map &.to_s
-      current_output << @translation_stack.pop.gsub("%s") { |r|
+      unhandled_args = args.clone.map &.as String?
+      add_text @translation_stack.pop.gsub("%s") { |r|
         i += 1
+        unhandled_args[i] = nil
         args[i]
-      }.gsub(/%(\d+)\$s/) { |r| args[r[1].to_i-1] }
-      if args.size > (i + 1)
+      }.gsub(/%(\d+)\$s/) { |r|
+        idx = r[1].to_i-1
+        unhandled_args[idx] = nil
+        args[idx]
+      }
+      unhandled_args.compact!
+      if unhandled_args.size > 0
         add_special " %( "
-        args[i+1..].each_with_index do |j, k|
+        unhandled_args.each_with_index do |j, k|
           add_special " , " if k > 0
           current_output << j
         end

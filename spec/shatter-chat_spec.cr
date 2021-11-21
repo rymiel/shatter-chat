@@ -163,6 +163,13 @@ module Shatter::Chat
 
     it "applies translatable with indexed arguments" do
       test_json_ansi(
+        %({"translate": "%2$s saw %1$s", "with": ["Alice", "Bob"]}),
+        %(Bob saw Alice)
+      )
+    end
+
+    it "applies translatable with mixed arguments" do
+      test_json_ansi(
         %({"translate": "Names: %s %2$s %s", "with": ["Alice", "Bob"]}),
         %(Names: Alice Bob Bob)
       )
@@ -220,6 +227,13 @@ module Shatter::Chat
     end
 
     it "applies translatable with indexed arguments" do
+      test_json_html(
+        %({"translate": "%2$s saw %1$s", "with": ["Alice", "Bob"]}),
+        %(Bob saw Alice)
+      )
+    end
+
+    it "applies translatable with mixed arguments" do
       test_json_html(
         %({"translate": "Names: %s %2$s %s", "with": ["Alice", "Bob"]}),
         %(Names: Alice Bob Bob)
