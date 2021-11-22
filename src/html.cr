@@ -85,7 +85,7 @@ module Shatter::Chat
       i = -1
       args = @argument_stack.pop.map &.to_s
       unhandled_args = args.clone.map &.as String?
-      add_text @translation_stack.pop.gsub("%s") { |r|
+      current_output << @translation_stack.pop.gsub("%s") { |r|
         i += 1
         unhandled_args[i] = nil
         args[i]
